@@ -1,57 +1,80 @@
-// to store last known min
+// store min
 let lastMin = -1;
 
 function setup() {
-  createCanvas(800, 600); 
-  angleMode(DEGREES);   
+  createCanvas(800, 600);
+  angleMode(DEGREES); 
 }
 
 function draw() {
-  background(240);
+  let hr = hour();
+  let mn = minute();
+  let sc = second();
 
-  // get time 
-  let hr = hour();    
-  let min = minute(); 
-  let sec = second(); 
-
-  // req: print value of min to JS console 
-  if (min !== lastMin) {
-    console.log("Minute changed to:", min);
-    lastMin = min;
+  // Log
+  if (mn !== lastMin) {
+    console.log("Minute changed to:", mn);
+    lastMin = mn;
   }
 
-  // Keep arcs consistent from 1–12:
+ 
   let hr12 = hr % 12;
-  if (hr12 === 0) hr12 = 12; 
+  let hourFrac = (hr12 + mn / 60 + sc / 3600) / 12; 
+  let minFrac = (mn + sc / 60) / 60;               
+  let secFrac = sc / 60;                           
 
+  // change bckg brightness 
+  let bgVal = lerp(30, 230, hourFrac);
+  background(bgVal);
+
+  // use star for mins
+  let outerRadius = lerp(50, 150, minFrac);
+  let innerRadius = outerRadius * 0.5;
+  let numPoints   = int(lerp(5, 10, minFrac));
+
+  push();
   translate(width / 2, height / 2);
-  rotate(-90); 
+  rotate(frameCount * 0.2);
+  fill(255, 150); 
+  stroke(0);
+  strokeWeight(2);
+  drawStar(0, 0, innerRadius, outerRadius, numPoints);
+  pop();
 
-  // 2nd arc 
-  let secAngle = map(sec, 0, 60, 0, 360);
+  // circle for secs 
+  let orbitRadius = 200;
+  let orbitAngle = 360 * secFrac; 
+  let orbX = width / 2 + orbitRadius * cos(orbitAngle);
+  let orbY = height / 2 + orbitRadius * sin(orbitAngle);
 
-  strokeWeight(10);
-  stroke(200, 50, 50);  // red
-  noFill();
-  arc(0, 0, 300, 300, 0, secAngle);
-
-  // min arc
-  let minAngle = map(min, 0, 60, 0, 360);
-  stroke(50, 100, 200); // blue
-  strokeWeight(16);
-  arc(0, 0, 270, 270, 0, minAngle);
-
-  //hour 
-  let hourAngle = map(hr12 + min / 60, 0, 12, 0, 360);
-  stroke(50, 200, 120); // green
-  strokeWeight(20);
-  arc(0, 0, 240, 240, 0, hourAngle);
-
-  // small indicators 
-  rotate(90); // rotate back to normal orientation for text
   noStroke();
-  fill(80);
-  textAlign(CENTER, CENTER);
+  fill(255, 0, 0);
+  circle(orbX, orbY, 20);
+
+  /*
+  // text for debugging
+  fill(0);
   textSize(16);
-  text(hr + ":" + nf(min, 2) + ":" + nf(sec, 2), 0, 0);
+  textAlign(LEFT, TOP);
+  text(`Hour fraction: ${nf(hourFrac, 1, 2)}`, 10, 10);
+  text(`Minute fraction: ${nf(minFrac, 1, 2)}`, 10, 30);
+  text(`Second fraction: ${nf(secFrac, 1, 2)}`, 10, 50);
+  */
+}
+
+// helper for star 
+function drawStar(x, y, radius1, radius2, npoints) {
+  let angle = 360 / npoints;
+  beginShape();
+  for (let a = 0; a < 360; a += angle) {
+    // outer vertex
+    let sx = x + cos(a) * radius2;
+    let sy = y + sin(a) * radius2;
+    vertex(sx, sy);
+    // inner vertex
+    sx = x + cos(a + angle / 2) * radius1;
+    sy = y + sin(a + angle / 2) * radius1;
+    vertex(sx, sy);
+  }
+  endShape(CLOSE);
 }
