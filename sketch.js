@@ -25,22 +25,21 @@ function draw() {
   let bgVal = lerp(30, 230, hourFrac);
   background(bgVal);
 
-  // ring for hour 
+  // swirl for hour 
   push();
   translate(width / 2, height / 2);
-  let ringRadius = 250;
-  for (let i = 0; i < 12; i++) {
-    let angle = i * 30 - 90;
-    let x = ringRadius * cos(angle);
-    let y = ringRadius * sin(angle);
-    if (i === hr12) {
-      fill(255, 150, 0);
-      circle(x, y, 40);
-    } else {
-      fill(80);
-      circle(x, y, 20);
-    }
+  stroke(200, 100, 200);
+  strokeWeight(2);
+  noFill();
+  beginShape();
+  let maxAngle = 360 * 12 * hourFrac;
+  for (let a = 0; a <= maxAngle; a += 5) {
+    let r = a * 0.2;
+    let x = r * cos(a - 90);
+    let y = r * sin(a - 90);
+    vertex(x, y);
   }
+  endShape();
   pop();
 
   // star for minutes
